@@ -127,7 +127,7 @@ if options.filter:
     pfilter = PacketFilter(options.filter)
     print(f"|_ PacketFilter online")
     for filter in options.filter:
-        print(f"   |_ Applying filter {} to incoming packets".format(filter))
+        print(f"   |_ Applying filter {filter} to incoming packets")
     try:
         pfilter.start()
     except KeyboardInterrupt:
