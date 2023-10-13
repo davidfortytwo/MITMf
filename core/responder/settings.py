@@ -122,20 +122,20 @@ class Settings(ConfigWatcher):
         self.WPAD_Script      = self.config['Responder']['HTTP Server']['WPADScript']
 
         if not os.path.exists(self.Html_Filename):
-            print "Warning: %s: file not found" % self.Html_Filename
+            print(f"Warning: {self.Html_Filename}: file not found")
 
         if not os.path.exists(self.Exe_Filename):
-            print "Warning: %s: file not found" % self.Exe_Filename
+            print(f"Warning: {self.Exe_Filename}: file not found")  # Updated print statement
 
         # SSL Options
         self.SSLKey  = self.config['Responder']['HTTPS Server']['SSLKey']
         self.SSLCert = self.config['Responder']['HTTPS Server']['SSLCert']
 
         # Respond to hosts
-        self.RespondTo         = filter(None, [x.upper().strip() for x in self.config['Responder']['RespondTo'].strip().split(',')])
-        self.RespondToName     = filter(None, [x.upper().strip() for x in self.config['Responder']['RespondToName'].strip().split(',')])
-        self.DontRespondTo     = filter(None, [x.upper().strip() for x in self.config['Responder']['DontRespondTo'].strip().split(',')])
-        self.DontRespondToName = filter(None, [x.upper().strip() for x in self.config['Responder']['DontRespondToName'].strip().split(',')])
+        self.RespondTo = [x.upper().strip() for x in self.config['Responder']['RespondTo'].strip().split(',') if x]
+        self.RespondToName = [x.upper().strip() for x in self.config['Responder']['RespondToName'].strip().split(',') if x]
+        self.DontRespondTo = [x.upper().strip() for x in self.config['Responder']['DontRespondTo'].strip().split(',') if x]
+        self.DontRespondToName = [x.upper().strip() for x in self.config['Responder']['DontRespondToName'].strip().split(',') if x]
 
         # CLI options
         self.Interface       = options.interface
@@ -161,13 +161,11 @@ class Settings(ConfigWatcher):
         # Set up Challenge
         self.NumChal = self.config['Responder']['Challenge']
 
-        if len(self.NumChal) is not 16:
-            print "The challenge must be exactly 16 chars long.\nExample: 1122334455667788"
+        if len(self.NumChal) != 16:
+            print("The challenge must be exactly 16 chars long.\nExample: 1122334455667788")
             sys.exit(-1)
 
-        self.Challenge = ""
-        for i in range(0, len(self.NumChal),2):
-            self.Challenge += self.NumChal[i:i+2].decode("hex")
+        self.Challenge = "".join([bytes.fromhex(self.NumChal[i:i+2]).decode('utf-8') for i in range(0, len(self.NumChal),2)])  # Updated hex decoding
 
         # Set up logging
         formatter = logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
