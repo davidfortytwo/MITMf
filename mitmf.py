@@ -76,96 +76,96 @@ def main():
     #Initialize plugins and pass them the parser NameSpace object
     plugins = [plugin(parser) for plugin in plugin.Plugin.__subclasses__()]
     
-      if len(sys.argv) == 1:
-            parser.print_help()
-            sys.exit(1)
-    
-        options = parser.parse_args()
-        logger().log_level = logging.__dict__[options.log_level.upper()]
-    
-        formatter = logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-        log = logger().setup_logger("MITMf", formatter)
+  if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
 
-    if options.read_pcap:
-        NetCreds().parse_pcap(options.read_pcap)
+    options = parser.parse_args()
+    logger().log_level = logging.__dict__[options.log_level.upper()]
 
-    options.ip = get_ip(options.interface)
-    options.mac = get_mac(options.interface)
-    settings.Config.populate(options)
-    log.debug(f"MITMf started: {sys.argv}")
+    formatter = logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    log = logger().setup_logger("MITMf", formatter)
 
-    print(f"[*] MITMf v{mitmf_version} - '{mitmf_codename}'")
+if options.read_pcap:
+    NetCreds().parse_pcap(options.read_pcap)
 
-    NetCreds().start(options.interface, options.ip)
-    print("|")
-    print(f"|_ Net-Creds v{NetCreds.version} online")
+options.ip = get_ip(options.interface)
+options.mac = get_mac(options.interface)
+settings.Config.populate(options)
+log.debug(f"MITMf started: {sys.argv}")
 
-    plugins_list = [plugin(parser) for plugin in plugin.Plugin.__subclasses__()]
-    ProxyPlugins().all_plugins = plugins_list
+print(f"[*] MITMf v{mitmf_version} - '{mitmf_codename}'")
+
+NetCreds().start(options.interface, options.ip)
+print("|")
+print(f"|_ Net-Creds v{NetCreds.version} online")
+
+plugins_list = [plugin(parser) for plugin in plugin.Plugin.__subclasses__()]
+ProxyPlugins().all_plugins = plugins_list
+
+for plugin in plugins_list:
+    if vars(options)[plugin.optname] is True:
+        ProxyPlugins().add_plugin(plugin)
+        print(f"|_ {plugin.name} v{plugin.version}")
+        if plugin.tree_info:
+            for line in range(0, len(plugin.tree_info)):
+                print(f"|  |_ {plugin.tree_info.pop()}")
+
+        plugin.setup_logger()
+        plugin.initialize(options)
+
+        if plugin.tree_info:
+            for line in range(0, len(plugin.tree_info)):
+                print(f"|  |_ {plugin.tree_info.pop()}")
+
+        plugin.start_config_watch()
+
+if options.filter:
+    pfilter = PacketFilter(options.filter)
+    print(f"|_ PacketFilter online")
+    for filter in options.filter:
+        print(f"   |_ Applying filter {filter} to incoming packets")
+    try:
+        pfilter.start()
+    except KeyboardInterrupt:
+        pfilter.stop()
+        shutdown()
+
+else:
+    URLMonitor.getInstance().setFaviconSpoofing(options.favicon)
+    URLMonitor.getInstance().setCaching(options.preserve_cache)
+    CookieCleaner.getInstance().setEnabled(options.killsessions)
+
+    strippingFactory = http.HTTPFactory(timeout=10)
+    strippingFactory.protocol = StrippingProxy
+
+    reactor.listenTCP(options.listen_port, strippingFactory)
 
     for plugin in plugins_list:
         if vars(options)[plugin.optname] is True:
-            ProxyPlugins().add_plugin(plugin)
-            print(f"|_ {plugin.name} v{plugin.version}")
-            if plugin.tree_info:
-                for line in range(0, len(plugin.tree_info)):
-                    print(f"|  |_ {plugin.tree_info.pop()}")
+            plugin.reactor(strippingFactory)
 
-            plugin.setup_logger()
-            plugin.initialize(options)
+    print("|_ Sergio-Proxy v0.2.1 online")
+    print("|_ SSLstrip v0.9 by Moxie Marlinspike online")
 
-            if plugin.tree_info:
-                for line in range(0, len(plugin.tree_info)):
-                    print(f"|  |_ {plugin.tree_info.pop()}")
+    from core.mitmfapi import mitmfapi
+    print("|")
+    print("|_ MITMf-API online")
+    mitmfapi().start()
 
-            plugin.start_config_watch()
+    HTTP().start()
+    print("|_ HTTP server online")
 
-    if options.filter:
-        pfilter = PacketFilter(options.filter)
-        print(f"|_ PacketFilter online")
-        for filter in options.filter:
-            print(f"   |_ Applying filter {filter} to incoming packets")
-        try:
-            pfilter.start()
-        except KeyboardInterrupt:
-            pfilter.stop()
-            shutdown()
+    DNSChef().start()
+    print(f"|_ DNSChef v{DNSChef.version} online")
 
-    else:
-        URLMonitor.getInstance().setFaviconSpoofing(options.favicon)
-        URLMonitor.getInstance().setCaching(options.preserve_cache)
-        CookieCleaner.getInstance().setEnabled(options.killsessions)
+    SMB().start()
+    print("|_ SMB server online\n")
 
-        strippingFactory = http.HTTPFactory(timeout=10)
-        strippingFactory.protocol = StrippingProxy
+    reactor.run()
+    print("\n")
 
-        reactor.listenTCP(options.listen_port, strippingFactory)
-
-        for plugin in plugins_list:
-            if vars(options)[plugin.optname] is True:
-                plugin.reactor(strippingFactory)
-
-        print("|_ Sergio-Proxy v0.2.1 online")
-        print("|_ SSLstrip v0.9 by Moxie Marlinspike online")
-
-        from core.mitmfapi import mitmfapi
-        print("|")
-        print("|_ MITMf-API online")
-        mitmfapi().start()
-
-        HTTP().start()
-        print("|_ HTTP server online")
-
-        DNSChef().start()
-        print(f"|_ DNSChef v{DNSChef.version} online")
-
-        SMB().start()
-        print("|_ SMB server online\n")
-
-        reactor.run()
-        print("\n")
-
-        shutdown()
+    shutdown()
 
 if __name__ == "__main__":
     main()
