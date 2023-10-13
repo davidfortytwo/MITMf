@@ -111,7 +111,7 @@ for plugin in plugins:
         print(f"|_ {plugin.name} v{plugin.version}")
         if plugin.tree_info:
             for line in xrange(0, len(plugin.tree_info)):
-                print(f"|  |_ {}".format(plugin.tree_info.pop()))
+                print(f"|  |_ {plugin.tree_info.pop()}")
 
         plugin.setup_logger()
         plugin.initialize(options)
