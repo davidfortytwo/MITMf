@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 # Copyright (c) 2014-2016 Moxie Marlinspike, Marcello Salvati
 #
@@ -35,7 +35,7 @@ from core.logger import logger
 from core.banners import get_banner
 from plugins import *
 
-print get_banner()
+print(get_banner())
 
 mitmf_version = '0.9.8'
 mitmf_codename = 'The Dark Side'
@@ -92,11 +92,11 @@ settings.Config.populate(options)
 log.debug("MITMf started: {}".format(sys.argv))
 
 #Start Net-Creds
-print "[*] MITMf v{} - '{}'".format(mitmf_version, mitmf_codename)
+print(f"[*] MITMf v{mitmf_version} - '{mitmf_codename}'")
 
 NetCreds().start(options.interface, options.ip)
-print "|"
-print "|_ Net-Creds v{} online".format(NetCreds.version)
+print("|")
+print(f"|_ Net-Creds v{NetCreds.version} online")
 
 from core.proxyplugins import ProxyPlugins
 
@@ -108,7 +108,7 @@ for plugin in plugins:
 
         ProxyPlugins().add_plugin(plugin)
 
-        print "|_ {} v{}".format(plugin.name, plugin.version)
+        print(f"|_ {plugin.name} v{plugin.version}")
         if plugin.tree_info:
             for line in xrange(0, len(plugin.tree_info)):
                 print "|  |_ {}".format(plugin.tree_info.pop())
@@ -152,29 +152,29 @@ else:
         if vars(options)[plugin.optname] is True:
             plugin.reactor(strippingFactory)
 
-    print "|_ Sergio-Proxy v0.2.1 online"
-    print "|_ SSLstrip v0.9 by Moxie Marlinspike online"
+    print("|_ Sergio-Proxy v0.2.1 online")
+    print("|_ SSLstrip v0.9 by Moxie Marlinspike online")
 
     #Start mitmf-api
     from core.mitmfapi import mitmfapi
-    print "|"
-    print "|_ MITMf-API online"
+    print("|")
+    print("|_ MITMf-API online")
     mitmfapi().start()
 
     #Start the HTTP Server
     from core.servers.HTTP import HTTP
     HTTP().start()
-    print "|_ HTTP server online"
+    print("|_ HTTP server online")
 
     #Start DNSChef
     from core.servers.DNS import DNSChef
     DNSChef().start()
-    print "|_ DNSChef v{} online".format(DNSChef.version)
+    print(f"|_ DNSChef v{DNSChef.version} online")
 
     #Start the SMB server
     from core.servers.SMB import SMB
     SMB().start()
-    print "|_ SMB server online\n"
+    print("|_ SMB server online\n")
 
     #start the reactor
     reactor.run()
