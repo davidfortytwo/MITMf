@@ -61,7 +61,7 @@ def main():
                                      epilog="Use wisely, young Padawan.",
                                      formatter_class=RawTextHelpFormatter)
 
-#add MITMf options
+    #add MITMf options
     sgroup = parser.add_argument_group("MITMf", "Options for MITMf")
     sgroup.add_argument("--log-level", type=str,choices=['debug', 'info'], default="info", help="Specify a log level [default: info]")
     sgroup.add_argument("-i", dest='interface', required=True, type=str, help="Interface to listen on")
@@ -76,7 +76,7 @@ def main():
     #Initialize plugins and pass them the parser NameSpace object
     plugins = [plugin(parser) for plugin in plugin.Plugin.__subclasses__()]
     
-  if len(sys.argv) == 1:
+    if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
