@@ -118,7 +118,7 @@ for plugin in plugins:
 
         if plugin.tree_info:
             for line in xrange(0, len(plugin.tree_info)):
-                print(f"|  |_ {}".format(plugin.tree_info.pop()))
+                print(f"|  |_ {plugin.tree_info.pop()}")
 
         plugin.start_config_watch()
 
