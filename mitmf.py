@@ -73,18 +73,18 @@ def main():
     sgroup.add_argument("-k", "--killsessions", action="store_true", help="Kill sessions in progress.")
     sgroup.add_argument("-F", "--filter", type=str, help='Filter to apply to incoming traffic', nargs='+')
 
-#Initialize plugins and pass them the parser NameSpace object
-plugins = [plugin(parser) for plugin in plugin.Plugin.__subclasses__()]
-
-  if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
-
-    options = parser.parse_args()
-    logger().log_level = logging.__dict__[options.log_level.upper()]
-
-    formatter = logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    log = logger().setup_logger("MITMf", formatter)
+    #Initialize plugins and pass them the parser NameSpace object
+    plugins = [plugin(parser) for plugin in plugin.Plugin.__subclasses__()]
+    
+      if len(sys.argv) == 1:
+            parser.print_help()
+            sys.exit(1)
+    
+        options = parser.parse_args()
+        logger().log_level = logging.__dict__[options.log_level.upper()]
+    
+        formatter = logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+        log = logger().setup_logger("MITMf", formatter)
 
     if options.read_pcap:
         NetCreds().parse_pcap(options.read_pcap)
