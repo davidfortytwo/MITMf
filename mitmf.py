@@ -111,23 +111,23 @@ for plugin in plugins:
         print(f"|_ {plugin.name} v{plugin.version}")
         if plugin.tree_info:
             for line in xrange(0, len(plugin.tree_info)):
-                print "|  |_ {}".format(plugin.tree_info.pop())
+                print(f"|  |_ {}".format(plugin.tree_info.pop()))
 
         plugin.setup_logger()
         plugin.initialize(options)
 
         if plugin.tree_info:
             for line in xrange(0, len(plugin.tree_info)):
-                print "|  |_ {}".format(plugin.tree_info.pop())
+                print(f"|  |_ {}".format(plugin.tree_info.pop()))
 
         plugin.start_config_watch()
 
 if options.filter:
     from core.packetfilter import PacketFilter
     pfilter = PacketFilter(options.filter)
-    print "|_ PacketFilter online"
+    print(f"|_ PacketFilter online")
     for filter in options.filter:
-        print "   |_ Applying filter {} to incoming packets".format(filter)
+        print(f"   |_ Applying filter {} to incoming packets".format(filter))
     try:
         pfilter.start()
     except KeyboardInterrupt:
@@ -178,6 +178,6 @@ else:
 
     #start the reactor
     reactor.run()
-    print "\n"
+    print(f"\n")
 
     shutdown()
